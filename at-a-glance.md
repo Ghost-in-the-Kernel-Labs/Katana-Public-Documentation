@@ -1,7 +1,7 @@
 # Katana at a glance
 
-> Describes Katana at commit `c18dc2c3a4c36704e7e7ae054ab30538e619b889` of its (private) source
-> repository, 2026-11-19. Every figure below names the file at that commit it was read from.
+> Describes Katana at commit `843076771d751f4013dbd72a41cd3cf96796566c` of its (private) source
+> repository, 2026-11-20. Every figure below names the file at that commit it was read from.
 
 ## What it does
 
@@ -45,7 +45,7 @@ wrong silently. Katana's roadmap lists the ones the Java must reproduce exactly
 
 ## What it has achieved, measured
 
-All figures are at commit `c18dc2c` and are read from files committed in the source repository.
+All figures are at commit `8430767` and are read from files committed in the source repository.
 Every comparison is against GnuCOBOL 3.1.2 (`cobc`), using its IBM dialect for IBM programs. No IBM
 mainframe output has been compared yet (see "Limits" below).
 
@@ -136,9 +136,9 @@ From the source repository at the same commit:
   planned step (`TODO.md` 9.5).
 - **A result covers only the data it was run on**, under the compile options and the clock it pinned,
   and only the paragraphs that data reached.
-- **No `katana` command line yet.** At this commit Katana runs through its build and test tooling; the
-  command-line tool is open work (`TODO.md` 8.1). The [user guide](user-guide.md) lists what can be run
-  today.
+- **The command line is new and partial.** `katana check`, `build`, `run` and `help` exist; `katana
+  prove`, which will check a run's output from the command line, is not on `main` yet (`TODO.md` 8.1).
+  The [user guide](user-guide.md) lists what can be run today.
 - **Not every class of undefined behaviour is detected yet:** reads of uninitialized storage are not
   yet found (`docs/FINDINGS.md`). Reports state the assumption made instead.
 

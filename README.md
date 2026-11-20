@@ -4,8 +4,8 @@ Katana compiles COBOL batch programs to Java whose output is byte-identical to t
 reports what it cannot make exact instead of guessing. Maintained by Ghost (GitHub:
 ghost-in-the-kernel).
 
-These pages describe Katana at commit `c18dc2c3a4c36704e7e7ae054ab30538e619b889` of its private
-source repository (2026-11-19). Every figure and behaviour names the file it was read from.
+These pages describe Katana at commit `843076771d751f4013dbd72a41cd3cf96796566c` of its private
+source repository (2026-11-20). Every figure and behaviour names the file it was read from.
 
 | Page | What it says |
 | --- | --- |

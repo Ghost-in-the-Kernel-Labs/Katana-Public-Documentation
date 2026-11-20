@@ -1,7 +1,7 @@
 # Glossary
 
-> Describes Katana at commit `c18dc2c3a4c36704e7e7ae054ab30538e619b889` of its source repository,
-> 2026-11-19. Katana keeps one word for each concept; the words here are the ones its code and
+> Describes Katana at commit `843076771d751f4013dbd72a41cd3cf96796566c` of its source repository,
+> 2026-11-20. Katana keeps one word for each concept; the words here are the ones its code and
 > documents use (`docs/GLOSSARY.md`).
 
 ## Katana's words

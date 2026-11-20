@@ -1,7 +1,7 @@
 # Architecture: the modules and their jobs
 
-> Describes Katana at commit `c18dc2c3a4c36704e7e7ae054ab30538e619b889` of its source repository,
-> 2026-11-19. This page stays at the level of what each module is for.
+> Describes Katana at commit `843076771d751f4013dbd72a41cd3cf96796566c` of its source repository,
+> 2026-11-20. This page stays at the level of what each module is for.
 
 Katana is built like a compiler: a front end reads the COBOL, an intermediate representation records
 exactly what the program does, and a back end writes Java that runs on a small runtime library. A
@@ -34,7 +34,8 @@ flowchart LR
 | `rt/` | The runtime library the generated Java uses: records as bytes and fields over them, decimal arithmetic under IBM's rules, the COBOL verbs (MOVE, DISPLAY, INSPECT, STRING, ...), sequential, relative and indexed files, SORT, CALL. Pure Java with no dependencies; it ships with the converted programs. |
 | `oracle/` | Runs the COBOL under GnuCOBOL and the Java on the same job and says whether their outputs agree. It never reads the code of the modules that produce the Java. It also runs the NIST suite and the GnuCOBOL testsuite. |
 | Further modules | Later stages that refactor the generated Java. They are not described in this public set. |
-| `cli/`, `project/` | Planned: the `katana` command and the workflows behind it (`TODO.md` 8.1). Declared, with no code yet. |
+| `project/` | The workflow from a COBOL source to its Java on disk: choose the profile, parse with the copybook folders, build, convert, write, compile against the runtime, run. Used by the `katana` command, and by the test suites, so both take the same path. |
+| `cli/` | The `katana` command: reads what was typed, calls `project/`, prints the report and returns the exit code ([user guide](user-guide.md#the-katana-command)). |
 
 ## Design rules that hold the layout
 

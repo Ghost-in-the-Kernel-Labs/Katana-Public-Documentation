@@ -1,27 +1,21 @@
 # User guide
 
-> Describes Katana at commit `c18dc2c3a4c36704e7e7ae054ab30538e619b889` of its source repository,
-> 2026-11-19. Paths in backticks are files in that repository.
+> Describes Katana at commit `843076771d751f4013dbd72a41cd3cf96796566c` of its source repository,
+> 2026-11-20. Paths in backticks are files in that repository.
 
 ## What you can run at this commit
 
-**There is no `katana` command yet.** The command-line tool is open work (`TODO.md` item 8.1). The
-roadmap plans `katana fixture`, `prove`, `build`, `pass`, `report` and `pack`, with `--json` on every
-report (`docs/ROADMAP.md` §8.1); the first slice is to be `katana check`, `katana build` and
-`katana help`, then `katana prove` with a printable report. None of them exists on `main` yet, so they
-have no arguments or exit codes to document. This guide will be updated when they land.
-
-Today Katana is used through its build:
-
 | What | For |
 | --- | --- |
-| [`gradle prove`](#gradle-prove-check-a-java-translation-against-its-cobol) | checking a Java translation of a COBOL program (anyone's, not only Katana's) against the original |
-| [Running a converted program](#running-a-converted-program) | running the Java Katana generates |
+| [`katana check`, `build`, `run`, `help`](#the-katana-command) | converting a COBOL program to Java, checking what Katana would report, and running the result |
+| [`gradle prove`](#gradle-prove-check-a-java-translation-against-its-cobol) | checking a Java translation of a COBOL program (anyone's, not only Katana's) against the original; the planned `katana prove` |
+| [Running a converted program](#running-a-converted-program) | running generated Java directly, with its files, options and exit codes |
 | [`katana.rt.Ksds`](#katanartksds-load-or-unload-an-indexed-file) | loading or unloading an indexed (VSAM KSDS) file for the converted programs |
 | [Build and test commands](#build-and-test-commands) | building Katana and running its test suites |
 
-The conversion itself (COBOL to Java) is at this commit a library call (`lower/Lower.java`), made by
-Katana's test suites; it has no command of its own until the CLI lands.
+Planned and not yet on `main`: `katana prove` (equivalence on a run's data, with a printable report),
+then `fixture`, `pass`, `report` and `pack`, with `--json` on every report (`docs/ROADMAP.md` §8.1,
+`TODO.md` 8.1 to 8.4).
 
 ## Install
 
@@ -57,12 +51,102 @@ The corpus is cloned into `corpus/` and never committed; its licences are in `co
 
 ---
 
+## The `katana` command
+
+The command-line tool, from TODO 8.1's first two slices (decision R-112; `katana`, `cli/Main.java`,
+`cli/Report.java`, `project/`). Its help text and the README's section "The katana command" are held
+equal by a test (`test/katana/cli/MainTest.java`). `katana prove` and the other commands the roadmap
+plans (`fixture`, `pass`, `report`, `pack`) are not on `main` yet.
+
+### Setting it up
+
+Build Katana's classes and the runtime's once, in the image:
+
+```sh
+docker run --rm --network none -u "$(id -u)" -v "$PWD":/katana katana gradle classes rtClasses --offline
+```
+
+Then run `./katana` from the repository root. The script runs `java` directly when a Java 21 is on
+the `PATH`; otherwise it runs inside the pinned image with no network, the current folder mounted at
+its own path, so files must be named under the current folder (`katana`, its header). If the classes
+are not built it says so and exits 3. It writes only under `--out`.
+
+### Commands
+
+```
+katana check <file> [--profile ibm|gnucobol|PATH] [--copy DIR]... [--strict]
+katana build <file> [--profile ibm|gnucobol|PATH] [--copy DIR]... [--out DIR] [--strict] [--compile]
+katana run   <file> [--profile ibm|gnucobol|PATH] [--copy DIR]... [--out DIR] [--strict] [-- program args...]
+katana help
+```
+
+| Command | What it does |
+| --- | --- |
+| `check` | parses, builds and converts the file in memory; prints the findings; writes nothing |
+| `build` | writes `<Class>.java` for each program in the file under `--out`, and prints the findings; with `--compile`, also compiles them with `javac` against the runtime alone, into the same folder. The Java is the direct translation, each statement with its COBOL line; no refactoring is applied (`project/Build.java`) |
+| `run` | builds, compiles, and runs the program (the file's first program) in a separate JVM. Its standard input, output and error pass through unchanged, and its exit code is `katana`'s. Everything `katana` itself says (the report, a one-line header, a one-line footer with the exit code) goes to standard error, so the program's standard output stays clean |
+| `help` (also `--help`, `-h`) | prints the usage |
+
+| Option | Meaning |
+| --- | --- |
+| `--profile P` | the dialect profile: `ibm` (the default), `gnucobol`, or the path of a profile file |
+| `--copy DIR` | a copybook folder, searched after the source file's own folder, in the order given; repeatable |
+| `--out DIR` | where `build` and `run` write (default `katana-out`); nothing is written anywhere else |
+| `--compile` | `build` only: also compile the Java, as `run` does |
+| `--strict` | any finding refuses the program: no Java is written, exit 1 |
+| `--trace` | an internal fault prints its stack trace |
+| `--` | `run` only: everything after it is passed to the program as its arguments (the first is its PARM) |
+
+One file per command. An unknown option, an option given twice (except `--copy`), a missing value,
+or no file is a usage error.
+
+**What it prints** (`cli/Report.java`): a first line naming the command, the source, the profile and
+its hash, and the copybook folders searched. Then either `refused, no Java written:` with the
+reasons (a missing copybook names the folders searched and suggests `--copy`), or one line per class
+(`wrote` or `would write`, with its statement count), then the findings: each coded finding (`NE-`,
+`HY-`, `CO-`) with its place and detail, other findings as written, and once per code what it means.
+`no findings` when there are none.
+
+**Exit codes** (`cli/Main.java`, R-112):
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Java written (for `check`: it would be); any findings printed. Findings alone do not change the exit code unless `--strict` is given |
+| 1 | refused: no Java written (the program cannot be built, a copybook is missing, or a finding under `--strict`) |
+| 2 | usage error, or the file cannot be read; the usage is printed to standard error |
+| 3 | an internal fault, including `javac` refusing Java that Katana wrote (Katana's fault, not the program's), or `./katana` run before the classes are built |
+| (run) | once the program has run, its own exit code (see [the exit codes of a converted program](#running-a-converted-program)); the footer on standard error says so |
+
+**Running a program.** `run` passes the profile's DISPLAY sign form to the program
+(`-Dkatana.dispsign`; under `--profile gnucobol` always `SEP`, as GnuCOBOL shows it;
+`project/Build.java`). The program inherits `katana`'s environment when `katana` runs on a local
+Java, so its files can be given as `DD_<name>` variables. When the script falls back to the Docker
+image it passes no environment variables into the container (the `katana` script has no `-e`), so in
+that case only standard input, arguments, and files named in the current folder reach the program.
+
+### Examples
+
+Not executed for this page; written from the code and the help text. Using a program and copybook
+from Katana's own repository (`oracle/fixture/trivial/`):
+
+```sh
+./katana check oracle/fixture/trivial/cbl/COPYREC.cbl --copy oracle/fixture/trivial/cpy
+./katana build oracle/fixture/trivial/cbl/COPYREC.cbl --copy oracle/fixture/trivial/cpy --out build/copyrec --compile
+./katana build legacy/PAYROLL.cbl --strict ; echo "exit $?"   # 1 if any finding
+./katana run   legacy/REPORT.cbl --profile gnucobol < input.txt > report.txt
+./katana run   legacy/PARMPGM.cbl -- "RUN=2024-03-01"
+```
+
+(`legacy/...` names are illustrative.)
+
+---
+
 ## `gradle prove`: check a Java translation against its COBOL
 
 Runs a COBOL program and someone's Java translation of it (a **port**) on the same job, and reports,
 for each output dataset and each step's printed output, whether the two are the same. The roadmap
-names this the standalone harness that "can verify anyone's Java" (`docs/ROADMAP.md` §0); the planned
-CLI will call it `katana prove` (`build.gradle`, the `prove` task's comment).
+names this the standalone harness that "can verify anyone's Java" (`docs/ROADMAP.md` §0); `katana prove`,
+not yet on `main`, is to replace it (`build.gradle`, the `prove` task's comment).
 
 **Usage** (`build.gradle` task `prove`; `oracle/prove/Prove.java`):
 
