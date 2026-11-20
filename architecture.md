@@ -52,10 +52,12 @@ From `docs/modules.json`, each checked by a test (`test/ModulesTest.java`):
 
 ## The two dialects
 
-- **IBM Enterprise COBOL** is the target (`profile/ibm.profile`). Source is read as IBM's by default.
-- **GnuCOBOL 3.1.2** is a second dialect (`profile/gnucobol.profile`), chosen only explicitly. Its
-  extensions are accepted only under it, and its results are counted separately and never as IBM
-  results. A third profile, `profile/cobol85.profile`, is used for the NIST suite.
+- **GnuCOBOL 3.1.2** is the dialect supported today (`profile/gnucobol.profile`).
+- **IBM Enterprise COBOL** is the goal and is in development (`profile/ibm.profile`). It is the
+  code's default profile, but its results are so far compared only with GnuCOBOL's emulation of IBM,
+  so IBM COBOL is not yet supported.
+- The two are kept apart: GnuCOBOL's extensions are accepted only under its profile, and its results
+  are never counted as IBM results. A third profile, `profile/cobol85.profile`, is used for the NIST suite.
 
 ## Around the modules
 

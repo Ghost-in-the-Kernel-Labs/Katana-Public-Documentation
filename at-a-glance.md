@@ -17,8 +17,10 @@ produces **the same output files, byte for byte,** as the original on the same i
 - **Checked by running it.** Katana runs the original COBOL and the Java on the same job and compares
   the files each one writes. A result is reported per job and per dataset, with the paragraphs of
   each program the job's data reached.
-- **Two dialects.** IBM Enterprise COBOL is the target. GnuCOBOL 3.1.2 is supported as a separate,
-  explicitly chosen dialect, and its results are never counted as IBM results.
+- **Supported today: GnuCOBOL 3.1.2.** Katana's output is checked against GnuCOBOL's own compiler,
+  `cobc`. **IBM Enterprise COBOL is the goal, not yet supported:** Katana has an IBM profile and reads
+  IBM's manuals for its rules, but no IBM compiler or mainframe output is in the loop yet, so its IBM
+  results are measured only against GnuCOBOL's emulation of IBM's dialect (see "Limits").
 
 Katana is maintained by Ghost (GitHub: ghost-in-the-kernel). The source is private.
 
@@ -46,13 +48,15 @@ wrong silently. Katana's roadmap lists the ones the Java must reproduce exactly
 ## What it has achieved, measured
 
 All figures are at commit `8430767` and are read from files committed in the source repository.
-Every comparison is against GnuCOBOL 3.1.2 (`cobc`), using its IBM dialect for IBM programs. No IBM
-mainframe output has been compared yet (see "Limits" below).
+Every comparison is against GnuCOBOL 3.1.2 (`cobc`). The CardDemo and NIST results were run with
+Katana's IBM profile against `cobc`'s IBM-compatibility mode (`-std=ibm`): they show agreement with
+GnuCOBOL, and are the groundwork for IBM support, not evidence of it. No IBM mainframe output has
+been compared yet (see "Limits" below).
 
 ### Real batch jobs: AWS CardDemo
 
 AWS CardDemo is an open-source (Apache-2.0) mainframe credit-card application. Its batch jobs were
-converted and run end to end, with every output dataset compared:
+converted and run end to end, with every output dataset compared against `cobc -std=ibm`:
 
 | Job | Program(s) | Output datasets compared | Result | Paragraphs reached |
 | --- | --- | --- | --- | --- |
@@ -84,8 +88,8 @@ error output) and records how far each case gets:
 
 | Census | PASS | also passes without an unsupported flag | FAIL | Source |
 | --- | --- | --- | --- | --- |
-| GnuCOBOL dialect | **125** | 16 | 5 | `test/katana/rt/autotest/lowered-gnucobol.golden` |
-| IBM dialect | **67** | 10 | 15 | `test/katana/rt/autotest/lowered.golden` |
+| GnuCOBOL dialect (supported) | **125** | 16 | 5 | `test/katana/rt/autotest/lowered-gnucobol.golden` |
+| IBM dialect (in development; compared with GnuCOBOL, not IBM) | **67** | 10 | 15 | `test/katana/rt/autotest/lowered.golden` |
 
 Most of the testsuite is not IBM COBOL: Katana classes the cases as 70 IBM, 299 other and 9 unknown
 (the same files). The rest of the cases stop at an earlier stage, by design: they use syntax the
@@ -130,8 +134,8 @@ From the source repository at the same commit:
 
 ## Limits, stated plainly
 
-- **No IBM mainframe output is in the loop yet.** Every result above is "the same as GnuCOBOL 3.1.2
-  gives". The count of census cases checked against IBM's own output is 0 at this commit
+- **IBM Enterprise COBOL is not supported yet.** Every result above is "the same as GnuCOBOL 3.1.2
+  gives", including those run under Katana's IBM profile. The count of census cases checked against IBM's own output is 0 at this commit
   (`test/katana/rt/autotest/floors.txt`, `IBMPASS 0`). Reconciling with a customer's z/OS output is a
   planned step (`TODO.md` 9.5).
 - **A result covers only the data it was run on**, under the compile options and the clock it pinned,
@@ -141,6 +145,21 @@ From the source repository at the same commit:
   The [user guide](user-guide.md) lists what can be run today.
 - **Not every class of undefined behaviour is detected yet:** reads of uninitialized storage are not
   yet found (`docs/FINDINGS.md`). Reports state the assumption made instead.
+
+## What is available under NDA
+
+These pages show what Katana does and what it has measured. More is available to a party under a
+non-disclosure agreement:
+
+- **The design:** how Katana makes and checks its output, in the internal documentation that these
+  pages leave out.
+- **The evidence behind each figure:** the full per-job reports, the census results case by case, and
+  the source repository the figures are read from.
+- **A live demonstration:** `katana check`, `build` and `run` on CardDemo and on test programs, with
+  the output compared as it runs.
+- **A trial on your own COBOL:** a batch program of yours converted and checked, under an evaluation
+  licence; your code and data stay with you and never enter Katana's repository.
+- **The roadmap:** the route to IBM Enterprise COBOL support, and what comes after the command line.
 
 ## Read next
 

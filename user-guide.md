@@ -89,7 +89,7 @@ katana help
 
 | Option | Meaning |
 | --- | --- |
-| `--profile P` | the dialect profile: `ibm` (the default), `gnucobol`, or the path of a profile file |
+| `--profile P` | the dialect profile: `ibm` (the default), `gnucobol`, or the path of a profile file. GnuCOBOL is the dialect supported today; the `ibm` profile is in development (see [Katana at a glance](at-a-glance.md#what-it-does)), so give `--profile gnucobol` for supported results |
 | `--copy DIR` | a copybook folder, searched after the source file's own folder, in the order given; repeatable |
 | `--out DIR` | where `build` and `run` write (default `katana-out`); nothing is written anywhere else |
 | `--compile` | `build` only: also compile the Java, as `run` does |

@@ -12,7 +12,7 @@
 | **job** | a JCL job made of steps |
 | **step** | one program execution within a job, with its datasets |
 | **profile** | the compile options a result holds for: compiler and version, IBM's TRUNC, ARITH, NUMPROC, code page and others, and the matching GnuCOBOL flags; identified by a SHA-256 hash of its contents |
-| **dialect** | the COBOL a profile reads: IBM Enterprise COBOL (the target) or GnuCOBOL 3.1.2 |
+| **dialect** | the COBOL a profile reads: GnuCOBOL 3.1.2 (supported today) or IBM Enterprise COBOL (in development) |
 | **Semantic IR** | Katana's exact record of what a program does: its data, its paragraphs, its statements, its files |
 | **lowering** | the step that writes Java from the Semantic IR |
 | **runtime** | `rt/`, the dependency-free Java library the generated programs run on |
