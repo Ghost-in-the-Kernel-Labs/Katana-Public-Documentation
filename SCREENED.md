@@ -1,8 +1,7 @@
 # Screening record
 
-Each page in this repository was screened before it was pushed: nothing in it may teach how Katana
-does what its maintainer intends to protect (Katana's decision R-037). Pages are copied here as plain
-files, never with another repository's history.
+Each page in this repository was screened against Katana's disclosure rules before it was pushed.
+Pages are copied here as plain files, never with another repository's history.
 
 | Page | Describes Katana commit | Screened |
 | --- | --- | --- |
